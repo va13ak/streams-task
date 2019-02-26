@@ -1,3 +1,7 @@
+/**
+ * @author <a href="mailto:va13ak@gmail.com">Valery Zakharov</a>
+ */
+
 package ua.procamp.streams.stream;
 
 import org.junit.Test;

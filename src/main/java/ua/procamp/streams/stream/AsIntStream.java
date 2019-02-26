@@ -29,36 +29,24 @@ public class AsIntStream implements IntStream {
 
     @Override
     public Integer max() {
-        Integer max = null;
-        for (Integer value: arrayList
-                ) {
-            if (value == null)
-                continue;
-            if (max == null) {
-                max = value;
-            } else if (max < value) {
-                max = value;
+        if (count() == 0) throw new IllegalArgumentException("Stream is empty");
+        return reduce(Integer.MIN_VALUE, new IntBinaryOperator() {
+            @Override
+            public int apply(int left, int right) {
+                return left > right ? left : right;
             }
-        }
-        if (max == null) throw new IllegalArgumentException("Stream is empty");
-        return max;
+        });
     }
 
     @Override
     public Integer min() {
-        Integer min = null;
-        for (Integer value: arrayList
-                ) {
-            if (value == null)
-                continue;
-            if (min == null) {
-                min = value;
-            } else if (min > value) {
-                min = value;
+        if (count() == 0) throw new IllegalArgumentException("Stream is empty");
+        return reduce(Integer.MAX_VALUE, new IntBinaryOperator() {
+            @Override
+            public int apply(int left, int right) {
+                return left < right ? left : right;
             }
-        }
-        if (min == null) throw new IllegalArgumentException("Stream is empty");
-        return min;
+        });
     }
 
     @Override
@@ -68,18 +56,13 @@ public class AsIntStream implements IntStream {
 
     @Override
     public Integer sum() {
-        Integer sum = null;
-        for (Integer value: arrayList
-                ) {
-            if (sum == null) {
-                sum = 0;
+        if (count() == 0) throw new IllegalArgumentException("Stream is empty");
+        return reduce(0, new IntBinaryOperator() {
+            @Override
+            public int apply(int left, int right) {
+                return left + right;
             }
-            if (value != null) {
-                sum += value;
-            }
-        }
-        if (sum == 0) throw new IllegalArgumentException("Stream is empty!");
-        return sum;
+        });
     }
 
     @Override
