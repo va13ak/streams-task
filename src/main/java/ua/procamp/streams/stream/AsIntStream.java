@@ -3,6 +3,7 @@ package ua.procamp.streams.stream;
 import ua.procamp.streams.function.*;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 public class AsIntStream implements IntStream {
     protected ArrayList<Integer> arrayList;
@@ -30,23 +31,13 @@ public class AsIntStream implements IntStream {
     @Override
     public Integer max() {
         if (count() == 0) throw new IllegalArgumentException("Stream is empty");
-        return reduce(Integer.MIN_VALUE, new IntBinaryOperator() {
-            @Override
-            public int apply(int left, int right) {
-                return left > right ? left : right;
-            }
-        });
+        return reduce(Integer.MIN_VALUE, (left, right) -> left > right ? left : right);
     }
 
     @Override
     public Integer min() {
         if (count() == 0) throw new IllegalArgumentException("Stream is empty");
-        return reduce(Integer.MAX_VALUE, new IntBinaryOperator() {
-            @Override
-            public int apply(int left, int right) {
-                return left < right ? left : right;
-            }
-        });
+        return reduce(Integer.MAX_VALUE, (left, right) -> left < right ? left : right);
     }
 
     @Override
@@ -57,12 +48,7 @@ public class AsIntStream implements IntStream {
     @Override
     public Integer sum() {
         if (count() == 0) throw new IllegalArgumentException("Stream is empty");
-        return reduce(0, new IntBinaryOperator() {
-            @Override
-            public int apply(int left, int right) {
-                return left + right;
-            }
-        });
+        return reduce(0, (left, right) -> left + right);
     }
 
     @Override
