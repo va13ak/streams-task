@@ -76,6 +76,7 @@ public class AsIntStream implements IntStream {
                 if (!hasNext) return false;
                 if (index < (localArrayList.size() - 1)) return true;
                 while (currIt.hasNext()) {
+                    System.out.println("filter: next");
                     int value = currIt.next();
                     if (predicate.test(value)) {
                         localArrayList.add(value);
@@ -88,8 +89,10 @@ public class AsIntStream implements IntStream {
 
             @Override
             public Integer next() {
-                if (hasNext())
+                if (hasNext()) {
+                    System.out.println("filter");
                     return localArrayList.get(++index);
+                }
                 return null;
             }
         };
@@ -136,7 +139,9 @@ public class AsIntStream implements IntStream {
                 if (!hasNext) return false;
                 if (index < (localArrayList.size() - 1)) return true;
                 if (currIt.hasNext()) {
-                    for (Integer value:func.applyAsIntStream(currIt.next()).toArray()
+                    System.out.println("flatMap: toArray");
+                    int[] array = func.applyAsIntStream(currIt.next()).toArray();
+                    for (Integer value:array
                          ) {
                         localArrayList.add(value);
                     }
@@ -148,6 +153,7 @@ public class AsIntStream implements IntStream {
 
             @Override
             public Integer next() {
+                System.out.println("flatMap");
                 if (hasNext())
                     return localArrayList.get(++index);
                 return null;
@@ -170,7 +176,7 @@ public class AsIntStream implements IntStream {
     public int[] toArray() {
         ArrayList<Integer> resArrList = new ArrayList<>();
         while (iterator.hasNext()) {
-            System.out.println("toArray");
+            System.out.println("toArray (get value)");
             resArrList.add(iterator.next());
         }
         int[] resArray = new int[resArrList.size()];
