@@ -7,18 +7,27 @@ import java.util.Iterator;
 
 public class AsIntStream implements IntStream {
     protected ArrayList<Integer> arrayList;
+    protected Iterator<Integer> iterator;
 
     private AsIntStream() {
         arrayList = new ArrayList<>();
     }
-    
+
     public static IntStream of(int... values) {
         AsIntStream newStream = new AsIntStream();
         for (int value: values
              ) {
             newStream.arrayList.add(value);
         }
+        newStream.iterator = newStream.arrayList.iterator();
         return newStream;
+    }
+
+    private Iterator<Integer> getIterator() {
+        if (iterator == null) {
+            iterator = arrayList.iterator();
+        }
+        return iterator;
     }
 
     @Override
@@ -31,12 +40,14 @@ public class AsIntStream implements IntStream {
     @Override
     public Integer max() {
         if (count() == 0) throw new IllegalArgumentException("Stream is empty");
+        System.out.println("max");
         return reduce(Integer.MIN_VALUE, (left, right) -> left > right ? left : right);
     }
 
     @Override
     public Integer min() {
         if (count() == 0) throw new IllegalArgumentException("Stream is empty");
+        System.out.println("min");
         return reduce(Integer.MAX_VALUE, (left, right) -> left < right ? left : right);
     }
 
@@ -48,67 +59,125 @@ public class AsIntStream implements IntStream {
     @Override
     public Integer sum() {
         if (count() == 0) throw new IllegalArgumentException("Stream is empty");
+        System.out.println("sum");
         return reduce(0, (left, right) -> left + right);
     }
 
     @Override
     public IntStream filter(IntPredicate predicate) {
-        AsIntStream newStream = new AsIntStream();
-        for (int value: arrayList
-                ) {
-            if (predicate.test(value)) newStream.arrayList.add(value);
-        }
-        return newStream;
+        final Iterator<Integer> currIt = getIterator();
+        iterator = new Iterator<Integer>() {
+            private int index = -1;
+            private boolean hasNext = true;
+            private ArrayList<Integer> localArrayList = new ArrayList<>();
+
+            @Override
+            public boolean hasNext() {
+                if (!hasNext) return false;
+                if (index < (localArrayList.size() - 1)) return true;
+                while (currIt.hasNext()) {
+                    int value = currIt.next();
+                    if (predicate.test(value)) {
+                        localArrayList.add(value);
+                        return true;
+                    }
+                }
+                hasNext = false;
+                return false;
+            }
+
+            @Override
+            public Integer next() {
+                if (hasNext())
+                    return localArrayList.get(++index);
+                return null;
+            }
+        };
+        return this;
     }
 
     @Override
     public void forEach(IntConsumer action) {
-        for (int value: arrayList
-                ) {
-            action.accept(value);
+        while (iterator.hasNext()) {
+            System.out.println("foreach");
+            action.accept(iterator.next());
         }
     }
 
     @Override
     public IntStream map(IntUnaryOperator mapper) {
-        AsIntStream newStream = new AsIntStream();
-        for (int value: arrayList
-                ) {
-            newStream.arrayList.add(mapper.apply(value));
-        }
-        return newStream;
+        final Iterator<Integer> currIt = iterator;
+        iterator = new Iterator<Integer>() {
+            @Override
+            public boolean hasNext() {
+                return currIt.hasNext();
+            }
+
+            @Override
+            public Integer next() {
+                System.out.println("map");
+                return mapper.apply(currIt.next());
+            }
+        };
+        return this;
     }
 
     @Override
     public IntStream flatMap(IntToIntStreamFunction func) {
-        AsIntStream newStream = new AsIntStream();
-        for (int value: arrayList
-                ) {
-            for (int intValue: func.applyAsIntStream(value).toArray()
-                 ) {
-                newStream.arrayList.add(intValue);
+        final Iterator<Integer> currIt = iterator;
+        iterator = new Iterator<Integer>() {
+            private int index = -1;
+            private boolean hasNext = true;
+            private ArrayList<Integer> localArrayList = new ArrayList<>();
+
+
+            @Override
+            public boolean hasNext() {
+                if (!hasNext) return false;
+                if (index < (localArrayList.size() - 1)) return true;
+                if (currIt.hasNext()) {
+                    for (Integer value:func.applyAsIntStream(currIt.next()).toArray()
+                         ) {
+                        localArrayList.add(value);
+                    }
+                    return true;
+                }
+                hasNext = false;
+                return false;
             }
-        }
-        return newStream;
+
+            @Override
+            public Integer next() {
+                if (hasNext())
+                    return localArrayList.get(++index);
+                return null;
+            }
+        };
+        return this;
     }
 
     @Override
     public int reduce(int identity, IntBinaryOperator op) {
         int result = identity;
-        for (int value: arrayList
-                ) {
-            result = op.apply(result, value);
+        while (iterator.hasNext()) {
+            System.out.println("reduce");
+            result = op.apply(result, iterator.next());
         }
         return result;
     }
 
     @Override
     public int[] toArray() {
-        int[] intArray = new int[arrayList.size()];
-        for (int i = 0; i < arrayList.size(); i++) {
-            intArray[i] = arrayList.get(i);
+        ArrayList<Integer> resArrList = new ArrayList<>();
+        while (iterator.hasNext()) {
+            System.out.println("toArray");
+            resArrList.add(iterator.next());
         }
-        return intArray;
+        int[] resArray = new int[resArrList.size()];
+        for (int i = 0; i < resArrList.size(); i++) {
+            resArray[i] = resArrList.get(i);
+        }
+        return resArray;
     }
 
 }
