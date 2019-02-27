@@ -16,19 +16,16 @@ public class AsIntStream implements IntStream {
 
     public static IntStream of(int... values) {
         AsIntStream newStream = new AsIntStream();
-        for (int value: values
-             ) {
+        for (int value : values)
             newStream.arrayList.add(value);
-        }
         newStream.iterator = newStream.arrayList.iterator();
         return newStream;
     }
 
     @Override
     public Iterator<Integer> getIterator() {
-        if (iterator == null) {
+        if (iterator == null)
             iterator = arrayList.iterator();
-        }
         return iterator;
     }
 
@@ -36,7 +33,7 @@ public class AsIntStream implements IntStream {
     public Double average() {
         Long cnt = count();
         if (cnt == 0) throw new IllegalArgumentException("Stream is empty");
-        return sum().doubleValue()/cnt.doubleValue();
+        return sum().doubleValue() / cnt.doubleValue();
     }
 
     @Override
@@ -87,9 +84,8 @@ public class AsIntStream implements IntStream {
 
             @Override
             public Integer next() {
-                if (hasNext()) {
+                if (hasNext())
                     return localArrayList.get(++index);
-                }
                 throw new NoSuchElementException();
             }
         };
@@ -98,9 +94,8 @@ public class AsIntStream implements IntStream {
 
     @Override
     public void forEach(IntConsumer action) {
-        while (iterator.hasNext()) {
+        while (iterator.hasNext())
             action.accept(iterator.next());
-        }
     }
 
     @Override
@@ -162,22 +157,19 @@ public class AsIntStream implements IntStream {
     @Override
     public int reduce(int identity, IntBinaryOperator op) {
         int result = identity;
-        while (iterator.hasNext()) {
+        while (iterator.hasNext())
             result = op.apply(result, iterator.next());
-        }
         return result;
     }
 
     @Override
     public int[] toArray() {
         ArrayList<Integer> resArrList = new ArrayList<>();
-        while (iterator.hasNext()) {
+        while (iterator.hasNext())
             resArrList.add(iterator.next());
-        }
         int[] resArray = new int[resArrList.size()];
-        for (int i = 0; i < resArrList.size(); i++) {
+        for (int i = 0; i < resArrList.size(); i++)
             resArray[i] = resArrList.get(i);
-        }
         return resArray;
     }
 
