@@ -2,6 +2,8 @@ package ua.procamp.streams.stream;
 
 import ua.procamp.streams.function.*;
 
+import java.util.Iterator;
+
 public interface IntStream {
 
     Double average();
@@ -25,4 +27,6 @@ public interface IntStream {
     Integer sum();
 
     int[] toArray();
+
+    Iterator<Integer> getIterator(); // va13ak
 }
