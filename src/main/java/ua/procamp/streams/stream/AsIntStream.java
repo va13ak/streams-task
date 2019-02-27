@@ -4,6 +4,7 @@ import ua.procamp.streams.function.*;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 public class AsIntStream implements IntStream {
     protected ArrayList<Integer> arrayList;
@@ -15,39 +16,34 @@ public class AsIntStream implements IntStream {
 
     public static IntStream of(int... values) {
         AsIntStream newStream = new AsIntStream();
-        for (int value: values
-             ) {
+        for (int value : values)
             newStream.arrayList.add(value);
-        }
         newStream.iterator = newStream.arrayList.iterator();
         return newStream;
     }
 
     private Iterator<Integer> getIterator() {
-        if (iterator == null) {
+        if (iterator == null)
             iterator = arrayList.iterator();
-        }
         return iterator;
     }
 
     @Override
     public Double average() {
         Long cnt = count();
-        if (cnt == 0) throw new IllegalArgumentException("Stream is empty!");
-        return sum().doubleValue()/cnt.doubleValue();
+        if (cnt == 0) throw new IllegalArgumentException("Stream is empty");
+        return sum().doubleValue() / cnt.doubleValue();
     }
 
     @Override
     public Integer max() {
         if (count() == 0) throw new IllegalArgumentException("Stream is empty");
-        System.out.println("max");
         return reduce(Integer.MIN_VALUE, (left, right) -> left > right ? left : right);
     }
 
     @Override
     public Integer min() {
         if (count() == 0) throw new IllegalArgumentException("Stream is empty");
-        System.out.println("min");
         return reduce(Integer.MAX_VALUE, (left, right) -> left < right ? left : right);
     }
 
@@ -59,7 +55,6 @@ public class AsIntStream implements IntStream {
     @Override
     public Integer sum() {
         if (count() == 0) throw new IllegalArgumentException("Stream is empty");
-        System.out.println("sum");
         return reduce(0, (left, right) -> left + right);
     }
 
@@ -76,7 +71,6 @@ public class AsIntStream implements IntStream {
                 if (!hasNext) return false;
                 if (index < (localArrayList.size() - 1)) return true;
                 while (currIt.hasNext()) {
-                    System.out.println("filter: next");
                     int value = currIt.next();
                     if (predicate.test(value)) {
                         localArrayList.add(value);
@@ -89,11 +83,9 @@ public class AsIntStream implements IntStream {
 
             @Override
             public Integer next() {
-                if (hasNext()) {
-                    System.out.println("filter");
+                if (hasNext())
                     return localArrayList.get(++index);
-                }
-                return null;
+                throw new NoSuchElementException();
             }
         };
         return this;
@@ -101,10 +93,8 @@ public class AsIntStream implements IntStream {
 
     @Override
     public void forEach(IntConsumer action) {
-        while (iterator.hasNext()) {
-            System.out.println("foreach");
+        while (iterator.hasNext())
             action.accept(iterator.next());
-        }
     }
 
     @Override
@@ -118,7 +108,6 @@ public class AsIntStream implements IntStream {
 
             @Override
             public Integer next() {
-                System.out.println("map");
                 return mapper.apply(currIt.next());
             }
         };
@@ -139,12 +128,9 @@ public class AsIntStream implements IntStream {
                 if (!hasNext) return false;
                 if (index < (localArrayList.size() - 1)) return true;
                 if (currIt.hasNext()) {
-                    System.out.println("flatMap: toArray");
                     int[] array = func.applyAsIntStream(currIt.next()).toArray();
-                    for (Integer value:array
-                         ) {
+                    for (Integer value : array)
                         localArrayList.add(value);
-                    }
                     return true;
                 }
                 hasNext = false;
@@ -153,10 +139,9 @@ public class AsIntStream implements IntStream {
 
             @Override
             public Integer next() {
-                System.out.println("flatMap");
                 if (hasNext())
                     return localArrayList.get(++index);
-                return null;
+                throw new NoSuchElementException();
             }
         };
         return this;
@@ -165,24 +150,19 @@ public class AsIntStream implements IntStream {
     @Override
     public int reduce(int identity, IntBinaryOperator op) {
         int result = identity;
-        while (iterator.hasNext()) {
-            System.out.println("reduce");
+        while (iterator.hasNext())
             result = op.apply(result, iterator.next());
-        }
         return result;
     }
 
     @Override
     public int[] toArray() {
         ArrayList<Integer> resArrList = new ArrayList<>();
-        while (iterator.hasNext()) {
-            System.out.println("toArray (get value)");
+        while (iterator.hasNext())
             resArrList.add(iterator.next());
-        }
         int[] resArray = new int[resArrList.size()];
-        for (int i = 0; i < resArrList.size(); i++) {
+        for (int i = 0; i < resArrList.size(); i++)
             resArray[i] = resArrList.get(i);
-        }
         return resArray;
     }
 

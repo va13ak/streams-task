@@ -1,2 +1,2 @@
-almost lazy implementation
-to become lazy needs to have declaration of method getIterator() in IntStream interface
+almost "lazy calculation" implementation
+some moments in flatMap()
