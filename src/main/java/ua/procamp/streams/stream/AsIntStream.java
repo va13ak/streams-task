@@ -65,16 +65,17 @@ public class AsIntStream implements IntStream {
         iterator = new Iterator<Integer>() {
             private int index = -1;
             private boolean hasNext = true;
-            private ArrayList<Integer> localArrayList = new ArrayList<>();
+            private int size = 0;
+            private int value;
 
             @Override
             public boolean hasNext() {
                 if (!hasNext) return false;
-                if (index < (localArrayList.size() - 1)) return true;
+                if (index < (size - 1)) return true;
                 while (currIt.hasNext()) {
-                    int value = currIt.next();
+                    value = currIt.next();
                     if (predicate.test(value)) {
-                        localArrayList.add(value);
+                        size++;
                         return true;
                     }
                 }
@@ -84,8 +85,10 @@ public class AsIntStream implements IntStream {
 
             @Override
             public Integer next() {
-                if (hasNext())
-                    return localArrayList.get(++index);
+                if (hasNext()) {
+                    index++;
+                    return value;
+                }
                 throw new NoSuchElementException();
             }
         };
@@ -121,24 +124,23 @@ public class AsIntStream implements IntStream {
         iterator = new Iterator<Integer>() {
             private int index = -1;
             private boolean hasNext = true;
-            private ArrayList<Integer> localArrayList = new ArrayList<>();
             private Iterator<Integer> subIterator;
+            private int size = 0;
+            private int value;
 
             @Override
             public boolean hasNext() {
                 if (!hasNext) return false;
-                if (index < (localArrayList.size() - 1)) return true;
-                if (subIterator != null)
-                    if (subIterator.hasNext()) {
-                        localArrayList.add(subIterator.next());
-                        return true;
-                    }
-                while (currIt.hasNext()) {
-                    subIterator = func.applyAsIntStream(currIt.next()).getIterator();
-                    if (subIterator.hasNext()) {
-                        localArrayList.add(subIterator.next());
-                        return true;
-                    }
+                if (index < (size - 1)) return true;
+                while (subIterator == null || subIterator.hasNext() || currIt.hasNext()) {
+                    if (subIterator == null || !subIterator.hasNext())
+                        if (currIt.hasNext())
+                            subIterator = func.applyAsIntStream(currIt.next()).getIterator();
+                        else
+                            break;
+                    value = subIterator.next();
+                    size++;
+                    return true;
                 }
                 hasNext = false;
                 return false;
@@ -146,8 +148,10 @@ public class AsIntStream implements IntStream {
 
             @Override
             public Integer next() {
-                if (hasNext())
-                    return localArrayList.get(++index);
+                if (hasNext()) {
+                    index++;
+                    return value;
+                }
                 throw new NoSuchElementException();
             }
         };
